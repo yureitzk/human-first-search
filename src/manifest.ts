@@ -30,7 +30,7 @@ const sharedManifest: Partial<chrome.runtime.ManifestBase> = {
 		page: 'src/entries/options/index.html',
 		open_in_tab: true,
 	},
-	permissions: ['storage', 'scripting', 'tabs', 'webRequest'],
+	permissions: ['storage', 'tabs', 'webRequest'],
 	...(isFirefox && {
 		browser_specific_settings: {
 			gecko: {

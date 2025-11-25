@@ -41,8 +41,6 @@ You can exclude websites from your search results.
 
 ## Permissions
 
-- `scripting`: Inject JavaScript into web pages to hide elements, such as
-  Google's Overview, from the page source code
 - `tabs`: For query parameters modifications in ManifestV3 browsers
 - `webRequest` and `webRequestBlocking`: Monitor and modify URLs when needed
 - `declarativeNetRequest`: Used in ManifestV3 browsers for creating network
