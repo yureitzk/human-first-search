@@ -42,6 +42,7 @@ const sharedManifest: Partial<chrome.runtime.ManifestBase> = {
 				}),
 				strict_min_version: '89.0',
 			},
+			gecko_android: {},
 		},
 	}),
 };
