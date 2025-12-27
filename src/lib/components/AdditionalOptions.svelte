@@ -6,6 +6,7 @@
 		duckAiChatOptionStorage,
 		duckAiAssistantOptionStorage,
 		duckAiImageFilterOptionStorage,
+		duckNoAiRedirectOptionStorage,
 		excludeSitesFromSearchOptionStorage,
 		disableCopilotOptionStorage,
 		googleOverviewInjectOptionStorage,
@@ -45,6 +46,10 @@
 		<AdditionalOption
 			name={'Disable DuckDuckGo Assist'}
 			storageId={duckAiAssistantOptionStorage}
+		/>
+		<AdditionalOption
+			name={'Redirect to DuckDuckGo No AI'}
+			storageId={duckNoAiRedirectOptionStorage}
 		/>
 		<AdditionalOption
 			name={'Enable DuckDuckGo filter for AI-Generated Images'}

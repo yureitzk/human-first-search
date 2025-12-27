@@ -1,8 +1,17 @@
 import { type Browser } from 'webextension-polyfill';
-import { type SiteParams, type Site, Google } from '~/lib/models/Site';
+import {
+	type SiteParams,
+	type Site,
+	Google,
+	DuckDuckGo,
+} from '~/lib/models/Site';
 import { type ChromeRule } from '~/lib/models/ChromeRule';
-import { constructUrlParams } from '~/lib/utils/sites';
-import { chromeRules, googleChromeRule } from '~/lib/constants/chromeRules';
+import { constructUrlHostname, constructUrlParams } from '~/lib/utils/sites';
+import {
+	chromeRules,
+	duckDuckGoChromeRule,
+	googleChromeRule,
+} from '~/lib/constants/chromeRules';
 
 export const convertQueryParamsToKeyValue = (
 	params: SiteParams[],
@@ -79,10 +88,19 @@ export async function chromeRuleController(
 			searchParamRegex,
 			2,
 		);
+	} else if (
+		chromeRule === duckDuckGoChromeRule &&
+		chromeRule.site instanceof DuckDuckGo
+	) {
+		const hostname = await constructUrlHostname(chromeRule.site, browser);
+
+		queryRule =
+			hostname !== chromeRule.site.domain
+				? chromeRule.getHostnameRedirectRule(hostname, 2)
+				: chromeRule.getAddTransformRule(keyValueParams);
 	} else {
 		queryRule = chromeRule.getAddTransformRule(keyValueParams);
 	}
-
 	const isSiteEnabled = await chromeRule.site.getStorageStatus(browser);
 
 	isSiteEnabled

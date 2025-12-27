@@ -9,7 +9,8 @@ import {
 	excludeSitesFromSearchOptionStorage,
 	redditOptionStorage,
 	duckAiImageFilterOptionStorage,
-	braveSummaryOptionStorage
+	braveSummaryOptionStorage,
+	duckNoAiRedirectOptionStorage,
 } from '../constants/storageDefinitions';
 import { sites } from '../constants/sites';
 import {
@@ -122,3 +123,36 @@ export const constructUrlQuery = async (
 	return queryStringArray;
 };
 
+export const constructUrlHostname = async (
+	site: Site,
+	browser: Browser,
+	options?: string[],
+): Promise<string> => {
+	let hostnameString: string = '';
+	const enabledOptions = options || (await getEnabledOptions(browser));
+	const optionHandlers: Record<string, () => Promise<void>> = {
+		[duckNoAiRedirectOptionStorage]: async () => {
+			if (site instanceof DuckDuckGo && site?.subdomainNoAi) {
+				hostnameString = site.getHostnameWithSubdomain(site.subdomainNoAi);
+			}
+		},
+	};
+	await Promise.all(
+		enabledOptions.map(async (option) => {
+			const handler = optionHandlers[option];
+			if (handler) {
+				await handler();
+			}
+		}),
+	);
+	return hostnameString;
+};
+
+export const isHostnameDifferent = (url: string, hostname: string): boolean =>
+	new URL(url).hostname !== hostname;
+
+export const replaceHostname = (url: string, newHostname: string): string => {
+	const urlObj = new URL(url);
+	urlObj.hostname = newHostname;
+	return urlObj.toString();
+};

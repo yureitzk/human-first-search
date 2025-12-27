@@ -11,7 +11,6 @@ export class ChromeRule {
 
 	getDeleteRule() {
 		const deleteRule = [this.id];
-
 		return deleteRule;
 	}
 
@@ -38,7 +37,28 @@ export class ChromeRule {
 				resourceTypes: [chrome.declarativeNetRequest.ResourceType.MAIN_FRAME],
 			},
 		};
-
 		return addRule;
 	}
+
+	getHostnameRedirectRule = (
+		newHostname: string,
+		priority?: number,
+	): chrome.declarativeNetRequest.Rule => {
+		return {
+			id: this.id,
+			priority: priority || 1,
+			action: {
+				type: chrome.declarativeNetRequest.RuleActionType.REDIRECT,
+				redirect: {
+					transform: {
+						host: newHostname,
+					},
+				},
+			},
+			condition: {
+				regexFilter: this.site.getBareDomainWithSearchRegex(),
+				resourceTypes: [chrome.declarativeNetRequest.ResourceType.MAIN_FRAME],
+			},
+		};
+	};
 }

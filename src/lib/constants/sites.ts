@@ -203,6 +203,7 @@ export const duckduckgo = new DuckDuckGo(
 	'duckduckgo.com',
 	'',
 	'q=',
+	['duckduckgo.com', 'noai.duckduckgo.com'],
 );
 
 export const brave = new Brave('Brave', 'search.brave.com', '/search', 'q=');

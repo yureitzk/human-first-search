@@ -9,6 +9,7 @@ export const googleOverviewOptionStorage = 'hideGoogleOverview';
 export const googleOverviewInjectOptionStorage = 'injectGoogleOverview';
 export const googleAiModeInjectOptionStorage = 'injectGoogleAiMode';
 export const duckAiChatOptionStorage = 'hideDuckAiChat';
+export const duckNoAiRedirectOptionStorage = 'redirectDuckNoAi';
 export const duckAiAssistantOptionStorage = 'hideDuckAiAssistant';
 export const duckAiImageFilterOptionStorage = 'enableDuckAiImageFilter';
 export const excludeSitesFromSearchOptionStorage = 'excludeSites';
@@ -25,6 +26,7 @@ export const optionStorageDefinitions: string[] = [
 	googleOverviewOptionStorage,
 	duckAiChatOptionStorage,
 	duckAiAssistantOptionStorage,
+	duckNoAiRedirectOptionStorage,
 	braveSummaryOptionStorage,
 	duckAiImageFilterOptionStorage,
 	excludeSitesFromSearchOptionStorage,

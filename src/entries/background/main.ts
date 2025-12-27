@@ -4,9 +4,12 @@ import { sites } from '~/lib/constants/sites';
 import { chromeRules } from '~/lib/constants/chromeRules';
 import { allSyncStorageDefinitions } from '~/lib/constants/storageDefinitions';
 import {
+	constructUrlHostname,
 	constructUrlParams,
 	constructUrlQuery,
 	getEnabledOptions,
+	isHostnameDifferent,
+	replaceHostname,
 } from '~/lib/utils/sites';
 import { chromeRuleController } from '~/lib/utils/chromeRules';
 import { setSettingsToDefault } from '~/lib/constants/defaultSettings';
@@ -114,21 +117,28 @@ function manifestv2NetworkCode() {
 				browser,
 				enabledOptions,
 			);
+			const hostname = await constructUrlHostname(site, browser, enabledOptions);
 
-			const missingUrlParams = urlParams.some((param: SiteParams) => {
-				return !site.hasParamsInUrl(currentUrl, param);
-			});
-
+			const missingUrlParams = urlParams.some(
+				(param: SiteParams) => !site.hasParamsInUrl(currentUrl, param),
+			);
+			const mismatchedHostname = hostname === '' ? isHostnameDifferent(currentUrl, hostname) : false;
 			const missingQueryOperators = queryOperators.some(
 				(queryOperator: string) =>
 					!site.textExistsInQuery(currentUrl, queryOperator),
 			);
+
+			const shouldRedirect =
+				missingUrlParams || missingQueryOperators || mismatchedHostname;
+
 			if (
 				details.type === 'main_frame' &&
 				isSiteEnabled === true &&
-				(missingUrlParams || missingQueryOperators)
+				shouldRedirect
 			) {
 				let updatedUrl = currentUrl;
+
+				updatedUrl = replaceHostname(currentUrl, hostname);
 
 				for (const param of urlParams) {
 					// To avoid unnecessary redirects on pages, e.g. images, news, etc

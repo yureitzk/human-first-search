@@ -44,6 +44,10 @@ export class Site {
 		return `${this.domain}${this.path}${this.query ? '?' + this.query : ''}`;
 	}
 
+	getHostnameWithSubdomain(subdomain: string) {
+		return `${subdomain}.${this.domain}`;
+	}
+
 	getDateParams(dateBefore?: string, dateAfter?: string): SiteParams {
 		return {
 			[this.dateParam]: `${dateBefore} - ${dateAfter}`,
@@ -111,11 +115,11 @@ export class Site {
 		for (const part of parts) {
 			const decodedPart = decodeURIComponent(part);
 			if (!this.isFilter(decodedPart) || !filterArray?.includes(decodedPart)) {
-				newParts.push(part); 
+				newParts.push(part);
 			}
 		}
 
-		newParts.push(text); 
+		newParts.push(text);
 
 		searchParamValue = newParts.join(' ').trim();
 		urlObj.searchParams.set(this.searchParam, searchParamValue);
@@ -172,6 +176,12 @@ export class Site {
 		});
 
 		return hostsGlob;
+	}
+
+	getBareDomainWithSearchRegex(): string {
+		const escapedDomain = this.domain.replace(/\./g, '\\.');
+		const pathPattern = this.path ? this.path.replace(/\//g, '\\/') : '\\/.*';
+		return `^https:\\/\\/${escapedDomain}${pathPattern}\\?.*${this.searchParam}=`;
 	}
 
 	getSiteHostRegex(): string {
@@ -313,6 +323,7 @@ export class Google extends Site {
 
 export class DuckDuckGo extends Site {
 	dateParam: string = 'df';
+	subdomainNoAi: string = 'noai';
 	disableAssistantParam = {
 		kbe: 0,
 	};
