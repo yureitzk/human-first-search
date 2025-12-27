@@ -15,6 +15,7 @@
 		display: flex;
 		align-items: center;
 		cursor: pointer;
+		width: fit-content;
 	}
 
 	input[type='radio'] {

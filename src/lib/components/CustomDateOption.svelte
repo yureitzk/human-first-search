@@ -1,26 +1,26 @@
 <script lang="ts">
-	import { DatePicker } from '@svelte-plugins/datepicker';
-	import { format } from 'date-fns';
+	import AirDatepicker, {
+		type AirDatepickerPositionCallback,
+	} from 'air-datepicker';
+	import 'air-datepicker/air-datepicker.css';
+	import localeEn from 'air-datepicker/locale/en';
+	import { onMount } from 'svelte';
 	import {
 		customDateOptionStorage,
 		customDateStartOptionStorage,
 		customDateEndOptionStorage,
 	} from '~/lib/constants/storageDefinitions';
-
-	const today: number = Date.now();
-	const MILLISECONDS_IN_DAY: number = 24 * 60 * 60 * 1000;
-
-	const getDateFromToday = (days: number): number => {
-		return Date.now() - days * MILLISECONDS_IN_DAY;
-	};
+	import {
+		getDateFromToday,
+		localDateToUtc,
+		utcToLocalDate,
+	} from '~/lib/utils/dates';
 
 	let startDate: number | '' = getDateFromToday(29);
-	let endDate: number | '' = today;
+	let endDate: number | '' = Date.now();
+	let datepickerInput: HTMLInputElement;
 	let dateFormat: string = 'MMM d, yyyy';
-	let isOpen: boolean = false;
-
-	let formattedStartDate: string = '';
-	let formattedEndDate: string = '';
+	let datepickerInstance: AirDatepicker | null = null;
 
 	const saveDateRangeToStorage = async (): Promise<void> => {
 		if (chrome?.storage?.sync) {
@@ -34,151 +34,146 @@
 	};
 
 	const loadDateRangeFromStorage = async (): Promise<void> => {
-		if (chrome?.storage?.sync) {
+		if (!chrome?.storage?.sync) return;
+
+		return new Promise((resolve) => {
 			chrome.storage.sync.get([customDateOptionStorage], (result) => {
-				if (result[customDateOptionStorage]) {
-					startDate =
-						result[customDateOptionStorage][
-							customDateStartOptionStorage
-						] ?? startDate;
-					endDate =
-						result[customDateOptionStorage][
-							customDateEndOptionStorage
-						] ?? endDate;
-
-					startDate = startDate ? Number(startDate) : '';
-					endDate = endDate ? Number(endDate) : '';
+				const storedData = result[customDateOptionStorage];
+				if (storedData) {
+					startDate = Number(storedData[customDateStartOptionStorage]) || startDate;
+					endDate = Number(storedData[customDateEndOptionStorage]) || endDate;
 				}
+				resolve();
 			});
-		}
+		});
 	};
 
-	$: if (startDate !== undefined && endDate !== undefined) {
-		saveDateRangeToStorage();
-	}
+	onMount(async () => {
+		await loadDateRangeFromStorage();
 
-	loadDateRangeFromStorage();
+		const positionDatepicker: AirDatepickerPositionCallback = ({
+			$datepicker,
+			$target,
+			$pointer,
+			done,
+		}) => {
+			const inputRect = $target.getBoundingClientRect();
+			const dpHeight = $datepicker.clientHeight;
+			const dpWidth = $datepicker.clientWidth;
+			const viewportHeight = window.innerHeight;
+			const spaceBelow = viewportHeight - inputRect.bottom;
+			const spaceAbove = inputRect.top;
 
-	const onClearDates = (): void => {
-		startDate = '';
-		endDate = '';
-		saveDateRangeToStorage();
-	};
+			let top: number;
+			if (spaceBelow >= dpHeight + 10) {
+				top = inputRect.bottom + window.scrollY + 8;
+			} else if (spaceAbove >= dpHeight + 10) {
+				top = inputRect.top + window.scrollY - dpHeight - 8;
+			} else {
+				top = inputRect.bottom + window.scrollY + 8;
+			}
 
-	const toggleDatePicker = (): void => {
-		isOpen = !isOpen;
-	};
+			let left = inputRect.left + inputRect.width / 2 - dpWidth / 2;
+			const maxLeft = window.innerWidth - dpWidth - 10;
+			left = Math.max(10, Math.min(left, maxLeft));
 
-	const formatDate = (dateString: number | ''): string => {
-		if (!dateString || isNaN(new Date(dateString).getTime())) {
-			return '';
-		}
-		return format(new Date(dateString), dateFormat);
-	};
+			$datepicker.style.left = `${left}px`;
+			$datepicker.style.top = `${top}px`;
+			$pointer.style.display = 'none';
 
-	$: formattedStartDate = formatDate(startDate);
-	$: formattedEndDate = formatDate(endDate);
+			return () => {
+				done();
+			};
+		};
+
+		const selectedDates = [
+			utcToLocalDate(startDate),
+			utcToLocalDate(endDate),
+		].filter((d) => d !== '');
+
+		const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+
+		datepickerInstance = new AirDatepicker(datepickerInput, {
+			locale: localeEn,
+			range: true,
+			multipleDatesSeparator: ' - ',
+			dateFormat,
+			position: isTouchDevice ? 'top' : positionDatepicker,
+			maxDate: new Date(),
+			selectedDates,
+			isMobile: isTouchDevice,
+			onSelect: async (date) => {
+				if (Array.isArray(date.date)) {
+					startDate = localDateToUtc(date.date[0], false);
+					endDate = date.date.length > 1 ? localDateToUtc(date.date[1], true) : '';
+				} else {
+					startDate = localDateToUtc(date.date, false);
+					endDate = '';
+				}
+				await saveDateRangeToStorage();
+			},
+		});
+
+		datepickerInput?.addEventListener('mousedown', (e) => {
+			if (
+				datepickerInstance &&
+				datepickerInstance.visible
+			) {
+				e.preventDefault();
+				datepickerInstance.hide();
+			}
+		});
+	});
 </script>
 
 <div class="date-filter">
-	<DatePicker
-		bind:isOpen
-		bind:startDate
-		bind:endDate
-		isRange
-	>
-		<div
-			class="date-field"
-			on:click={toggleDatePicker}
-			on:keydown={(e) => e.key === 'Enter' && toggleDatePicker()}
-			role="button"
-			tabindex="0"
-			class:open={isOpen}
-		>
-			<i class="icon-calendar" />
-			<div class="date">
-				{#if startDate}
-					{formattedStartDate} - {formattedEndDate}
-				{:else}
-					Pick a date
-				{/if}
-			</div>
-			{#if startDate}
-				<span
-					on:click={onClearDates}
-					on:keydown={(e) => e.key === 'Enter' && onClearDates()}
-					role="button"
-					tabindex="0"
-				>
-					<i class="os-icon-x" />
-				</span>
-			{/if}
-		</div>
-	</DatePicker>
+	<input
+		bind:this={datepickerInput}
+		readonly
+		class="input"
+		id="date-picker"
+		type="text"
+		placeholder="Pick a date"
+	/>
 </div>
 
 <style>
-
-	:root {
-		--datepicker-state-active: #fd9745;
-	}
-
 	.date-filter {
 		margin-top: 15px;
+		position: relative;
+		width: fit-content;
+		max-width: 100%;
 	}
 
-	.date-field {
-		align-items: center;
-		background-color: #fff;
-		border-bottom: 1px solid #000000;
-		display: inline-flex;
-		gap: 8px;
-		min-width: 100px;
-		padding: 16px;
+	.input {
+		padding: 6px 8px 6px calc(20px + 6px + 8px);
+		border-radius: 4px;
+		outline: 2px solid #000;
+		border: none;
+		cursor: pointer;
+		box-sizing: border-box;
+		max-width: 100%;
 	}
 
-	.date-field.open {
-		border-bottom: 1px solid #fd9745;
+	.input:active,
+	.input:focus-visible,
+	.input:focus {
+		outline-color: #fd9745;
 	}
 
-	.date-field .icon-calendar {
-		background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAEmSURBVHgB7ZcPzcIwEMUfXz4BSCgKwAGgACRMAg6YBBxsOMABOAAHFAXgAK5Z2Y6lHbfQ8SfpL3lZaY/1rb01N+BHUKSMNBfEJjZWISA56Uo6C2KvVpkgFn9oRx9vICFtUT1JKO3tvRtZdjBxXQs+YY+1FenIfuesPUGVVLzfRWKvmrSzbbN19wS+kAb2+sCEuUxrYzkbe4YvCVM2Vr5NPAkVa+van7Wn38U95uTpN5TJ/A8ZKemAakmbmJJGpI0gVmwA0huieFItjG19DgTHtwIZhCfZq3ztCuzQYh+FKBSvusjAGs8PnLYkLgMf34JoIBqIBqKBaIAb0Kw9RlhMCTbzzPWAqYq7LsuPaGDUsYmznaOk5zChUJTNQ4TFVMkrOL4HPsoNn26PxROHCggAAAAASUVORK5CYII=)
-			no-repeat center center;
-		background-size: 14px 14px;
-		height: 14px;
-		width: 14px;
-	}
-
-	@media screen and (max-width: 48rem) {
-		:global(.datepicker) {
-			--datepicker-calendar-width: 100%;
-			--datepicker-container-width: 100%;
-
-			--datepicker-calendar-container-grid-template-columns: repeat(
-				7,
-				40px
-			);
-
-			--datepicker-calendar-day-width: 40px;
-			--datepicker-calendar-day-height: 40px;
-			--datepicker-calendar-range-included-height: var(
-				--datepicker-calendar-day-height
-			);
-			--datepicker-calendar-header-padding: var(
-				--datepicker-padding-small
-			);
-			--datepicker-calendar-header-margin: 0 0
-				var(--datepicker-margin-small) 0;
-			--datepicker-calendar-padding: var(--datepicker-padding-base);
-			--datepicker-container-top: -40%;
-		}
-
-		:global(.datepicker) {
-			position: static !important;
-		}
-	}
-
-	:global(.calendars-container) {
-		width: fit-content !important;
+	.date-filter::before {
+		left: 8px;
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		content: '';
+		mask: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAEmSURBVHgB7ZcPzcIwEMUfXz4BSCgKwAGgACRMAg6YBBxsOMABOAAHFAXgAK5Z2Y6lHbfQ8SfpL3lZaY/1rb01N+BHUKSMNBfEJjZWISA56Uo6C2KvVpkgFn9oRx9vICFtUT1JKO3tvRtZdjBxXQs+YY+1FenIfuesPUGVVLzfRWKvmrSzbbN19wS+kAb2+sCEuUxrYzkbe4YvCVM2Vr5NPAkVa+van7Wn38U95uTpN5TJ/A8ZKemAakmbmJJGpI0gVmwA0huieFItjG19DgTHtwIZhCfZq3ztCuzQYh+FKBSvusjAGs8PnLYkLgMf34JoIBqIBqKBaIAb0Kw9RlhMCTbzzPWAqYq7LsuPaGDUsYmznaOk5zChUJTNQ4TFVMkrOL4HPsoNn26PxROHCggAAAAASUVORK5CYII=)
+			no-repeat 50% 50%;
+		background-color: #000;
+		width: 20px;
+		height: 20px;
+		mask-size: 20px;
+		display: inline-block;
+		pointer-events: none;
 	}
 </style>

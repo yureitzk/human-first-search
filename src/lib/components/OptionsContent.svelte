@@ -84,6 +84,7 @@
 
 	.accordion {
 		transition: 0.4s;
+		width: fit-content;
 	}
 
 	.date-section {
