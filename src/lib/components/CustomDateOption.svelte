@@ -5,6 +5,7 @@
 	import 'air-datepicker/air-datepicker.css';
 	import localeEn from 'air-datepicker/locale/en';
 	import { onMount } from 'svelte';
+	import type { Browser } from 'webextension-polyfill';
 	import {
 		customDateOptionStorage,
 		customDateStartOptionStorage,
@@ -15,23 +16,13 @@
 		localDateToUtc,
 		utcToLocalDate,
 	} from '~/lib/utils/dates';
+	import { setDateRangeToStorage } from '~/lib/utils/storage';
 
 	let startDate: number | '' = getDateFromToday(29);
 	let endDate: number | '' = Date.now();
 	let datepickerInput: HTMLInputElement;
 	let dateFormat: string = 'MMM d, yyyy';
 	let datepickerInstance: AirDatepicker | null = null;
-
-	const saveDateRangeToStorage = async (): Promise<void> => {
-		if (chrome?.storage?.sync) {
-			await chrome.storage.sync.set({
-				[customDateOptionStorage]: {
-					[customDateStartOptionStorage]: startDate,
-					[customDateEndOptionStorage]: endDate,
-				},
-			});
-		}
-	};
 
 	const loadDateRangeFromStorage = async (): Promise<void> => {
 		if (!chrome?.storage?.sync) return;
@@ -116,7 +107,7 @@
 							? localDateToUtc(date.date[1], true)
 							: localDateToUtc(date.date[0], true);
 				}
-				await saveDateRangeToStorage();
+				await setDateRangeToStorage(startDate, endDate, chrome as unknown as Browser);
 			},
 		});
 

@@ -154,3 +154,19 @@ export async function getOptionValueFromStorage(
 	}
 }
 
+export async function setDateRangeToStorage(
+	startDate: string | number,
+	endDate: string | number,
+	browser: Browser,
+) {
+	try {
+		await browser.storage.sync.set({
+			[customDateOptionStorage]: {
+				[customDateStartOptionStorage]: startDate,
+				[customDateEndOptionStorage]: endDate,
+			},
+		});
+	} catch (error) {
+		console.error('Error setting date range to storage:', error);
+	}
+}

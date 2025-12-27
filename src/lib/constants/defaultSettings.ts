@@ -1,11 +1,13 @@
 import type { Browser } from 'webextension-polyfill';
 import { sites } from '~/lib/constants/sites';
 import { before2023Date } from '~/lib/constants/dates';
+import { getDateFromToday } from '~/lib/utils/dates';
 import {
 	setDateToStorage,
 	setOptionValueToSyncStorage,
 	setExcludedSitesToStorage,
 	setOptionValueToLocalStorage,
+	setDateRangeToStorage,
 } from '~/lib/utils/storage';
 import {
 	duckAiChatOptionStorage,
@@ -31,9 +33,7 @@ export async function setSettingsToDefault(browser: Browser) {
 		await removeAllChromeRules();
 		await addAllChromeRules(browser);
 	}
-
 	await Promise.all(sites.map((site) => site.setStorageStatus(browser, true)));
-
 	const defaultValues: Record<string, boolean> = {
 		[googleOverviewOptionStorage]: true,
 		[duckAiChatOptionStorage]: true,
@@ -46,7 +46,6 @@ export async function setSettingsToDefault(browser: Browser) {
 		[braveSummaryOptionStorage]: true,
 		[braveAskInjectOptionStorage]: true,
 	};
-
 	await Promise.all(
 		optionStorageDefinitions.map((option) => {
 			const value = defaultValues[option] ?? false;
@@ -54,8 +53,12 @@ export async function setSettingsToDefault(browser: Browser) {
 		}),
 	);
 	await setDateToStorage(before2023Date, browser);
-	await setExcludedSitesToStorage(['chatgpt.com'], browser);
 
+	const startDate = getDateFromToday(29);
+	const endDate = Date.now();
+	await setDateRangeToStorage(startDate, endDate, browser);
+
+	await setExcludedSitesToStorage(['chatgpt.com'], browser);
 	await setOptionValueToLocalStorage(
 		showAdditionalOptionsOptionStorage,
 		false,
