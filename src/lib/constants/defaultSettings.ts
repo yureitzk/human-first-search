@@ -39,7 +39,7 @@ export async function setSettingsToDefault(browser: Browser) {
 		[duckAiChatOptionStorage]: true,
 		[duckAiAssistantOptionStorage]: true,
 		[duckAiImageFilterOptionStorage]: true,
-		[duckNoAiRedirectOptionStorage]: true,
+		[duckNoAiRedirectOptionStorage]: false,
 		[disableCopilotOptionStorage]: true,
 		[googleOverviewInjectOptionStorage]: true,
 		[googleAiModeInjectOptionStorage]: true,
