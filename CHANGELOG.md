@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/yureitzk/human-first-search/compare/v1.3.0...v1.4.0) (2025-12-27)
+
+
+### Bug Fixes
+
+* set android compatibility version for firefox ([d78e224](https://github.com/yureitzk/human-first-search/commit/d78e224593b3eeb6fd1364de91a695514d858bbb))
+
 ## [1.3.0](https://github.com/yureitzk/human-first-search/compare/v1.2.0...v1.3.0) (2025-12-27)
 
 
