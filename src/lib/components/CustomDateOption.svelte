@@ -91,6 +91,12 @@
 			utcToLocalDate(endDate),
 		].filter((d) => d !== '');
 
+		const uniqueSelectedDates =
+			selectedDates.length === 2 &&
+			selectedDates[0].getTime() === selectedDates[1].getTime()
+				? [selectedDates[0]]
+				: selectedDates;
+
 		const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
 
 		datepickerInstance = new AirDatepicker(datepickerInput, {
@@ -100,25 +106,22 @@
 			dateFormat,
 			position: isTouchDevice ? 'top' : positionDatepicker,
 			maxDate: new Date(),
-			selectedDates,
+			selectedDates: uniqueSelectedDates,
 			isMobile: isTouchDevice,
 			onSelect: async (date) => {
-				if (Array.isArray(date.date)) {
+				if (Array.isArray(date.date) && date.date.length >= 1) {
 					startDate = localDateToUtc(date.date[0], false);
-					endDate = date.date.length > 1 ? localDateToUtc(date.date[1], true) : '';
-				} else {
-					startDate = localDateToUtc(date.date, false);
-					endDate = '';
+					endDate =
+						date.date.length > 1
+							? localDateToUtc(date.date[1], true)
+							: localDateToUtc(date.date[0], true);
 				}
 				await saveDateRangeToStorage();
 			},
 		});
 
 		datepickerInput?.addEventListener('mousedown', (e) => {
-			if (
-				datepickerInstance &&
-				datepickerInstance.visible
-			) {
+			if (datepickerInstance && datepickerInstance.visible) {
 				e.preventDefault();
 				datepickerInstance.hide();
 			}
