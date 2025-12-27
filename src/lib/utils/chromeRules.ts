@@ -94,10 +94,12 @@ export async function chromeRuleController(
 	) {
 		const hostname = await constructUrlHostname(chromeRule.site, browser);
 
-		queryRule =
-			hostname !== chromeRule.site.domain
-				? chromeRule.getHostnameRedirectRule(hostname, 2)
-				: chromeRule.getAddTransformRule(keyValueParams);
+		if (hostname && hostname !== chromeRule.site.domain) {
+			queryRule = chromeRule.getHostnameRedirectRule(hostname, 2);
+		} else {
+			await removeChromeRules([chromeRule.id]);
+			return;
+		}
 	} else {
 		queryRule = chromeRule.getAddTransformRule(keyValueParams);
 	}
