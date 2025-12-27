@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/yureitzk/human-first-search/compare/v1.2.0...v1.3.0) (2025-12-27)
+
+
+### Features
+
+* update date picker ([8bd0216](https://github.com/yureitzk/human-first-search/commit/8bd0216aa818c12518ba8d56d2da4ced48f18cdd))
+
 ## [1.2.0](https://github.com/yureitzk/human-first-search/compare/v1.1.0...v1.2.0) (2025-12-12)
 
 
