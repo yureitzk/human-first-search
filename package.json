@@ -1,6 +1,6 @@
 {
 	"name": "human-first-search",
-	"version": "1.4.0",
+	"version": "1.5.0",
 	"displayName": "Human-First Search",
 	"author": "yureitzk",
 	"description": "Filter out AI-generated content from search engines",

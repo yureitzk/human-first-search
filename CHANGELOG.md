@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/yureitzk/human-first-search/compare/v1.4.0...v1.5.0) (2025-12-27)
+
+
+### Bug Fixes
+
+* build script for firefox in production ([27aa12e](https://github.com/yureitzk/human-first-search/commit/27aa12ee901ced0361b8b8105e643ea75ab5539b))
+
 ## [1.4.0](https://github.com/yureitzk/human-first-search/compare/v1.3.0...v1.4.0) (2025-12-27)
 
 
