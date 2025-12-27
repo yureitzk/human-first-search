@@ -52,11 +52,12 @@ async function manifestv3NetworkCode() {
 
 	sites.forEach((site) => {
 		const handleRequest = (details: chrome.webRequest.WebRequestDetails) => {
-			chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-				try {
-					const currentTab = tabs[0];
-					if (!currentTab || !currentTab.id) return;
+			const tabId = details.tabId;
 
+			if (!tabId || tabId === -1) return;
+
+			(async () => {
+				try {
 					const currentUrl = details.url;
 					const enabledOptions = await getEnabledOptions(browser);
 
@@ -77,7 +78,6 @@ async function manifestv3NetworkCode() {
 
 					if (isSiteEnabled && missingQueryOperators) {
 						let updatedUrl = currentUrl;
-
 						const queryOperatorsString = queryOperators.join(' ');
 						updatedUrl = site.addTextToQueryInUrl(
 							updatedUrl,
@@ -86,13 +86,13 @@ async function manifestv3NetworkCode() {
 						);
 
 						if (updatedUrl !== currentUrl) {
-							chrome.tabs.update(currentTab.id, { url: updatedUrl });
+							chrome.tabs.update(tabId, { url: updatedUrl });
 						}
 					}
 				} catch (error) {
 					console.error('An error during tab update', error);
 				}
-			});
+			})();
 		};
 
 		chrome.webRequest.onBeforeRequest.addListener(handleRequest, {
@@ -122,7 +122,8 @@ function manifestv2NetworkCode() {
 			const missingUrlParams = urlParams.some(
 				(param: SiteParams) => !site.hasParamsInUrl(currentUrl, param),
 			);
-			const mismatchedHostname = hostname === '' ? isHostnameDifferent(currentUrl, hostname) : false;
+			const mismatchedHostname =
+				hostname === '' ? isHostnameDifferent(currentUrl, hostname) : false;
 			const missingQueryOperators = queryOperators.some(
 				(queryOperator: string) =>
 					!site.textExistsInQuery(currentUrl, queryOperator),
