@@ -2,7 +2,7 @@
 	import { createEventDispatcher } from 'svelte';
 
 	export let checked: boolean;
-	export let id: string; 
+	export let id: string;
 	const dispatch = createEventDispatcher();
 
 	function handleChange() {
@@ -38,7 +38,7 @@
 		right: 0;
 		bottom: 0;
 		background-color: #ccc;
-		transition: 0.4s;
+		transition: background-color 0.3s ease, border-color 0.3s ease;
 		border: 1px solid #000000;
 		border-radius: 6px;
 	}
@@ -51,7 +51,7 @@
 		left: 4px;
 		top: 50%;
 		background-color: #fff;
-		transition: 0.4s;
+		transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
 		border: 1px solid #000000;
 		border-radius: 30%;
 		transform: translateY(-50%);
@@ -63,5 +63,10 @@
 
 	input:checked + .slider:before {
 		transform: translate(24px, -50%);
+	}
+
+	input:focus-visible + .slider {
+		outline: 2px solid #5b9dd9;
+		outline-offset: 2px;
 	}
 </style>

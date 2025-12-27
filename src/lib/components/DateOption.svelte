@@ -25,21 +25,25 @@
 		height: 20px;
 		border: 2px solid #000;
 		border-radius: 50%;
-		outline: none;
-		transition: 0.2s all linear;
 		position: relative;
 	}
 
-	input[type='radio']:checked::before {
+	input[type='radio']::before {
 		content: '';
 		position: absolute;
 		border-radius: 50%;
-		background-color: #000;
+		background-color: transparent;
+		transition: background-color 0.2s linear;
 		width: 50%;
 		height: 50%;
 		top: 50%;
 		left: 50%;
-		transform: translate(-50%, -50%);
+		background-color: #000;
+		transform: translate(-50%, -50%) scale(0);
+		transition: transform 0.3s ease;
 	}
 
+	input[type='radio']:checked::before {
+		transform: translate(-50%, -50%) scale(1);
+	}
 </style>
