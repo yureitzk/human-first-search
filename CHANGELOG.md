@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.6.0](https://github.com/yureitzk/human-first-search/compare/v1.5.0...v1.6.0) (2025-12-27)
+
+
+### Features
+
+* hide copilot search answer elemenent ([9cc49d3](https://github.com/yureitzk/human-first-search/commit/9cc49d33f34dd5732780d3f11def35587fe93ae4))
+* redirect to noai subdomain for duckduckgo ([2e1a7ee](https://github.com/yureitzk/human-first-search/commit/2e1a7ee63240c3597266ab90630c0cd90c15c7b4))
+
+
+### Bug Fixes
+
+* date range in date picker ([6478626](https://github.com/yureitzk/human-first-search/commit/6478626f73f5ea463b135249583d9dacf4d1ddb8))
+* query params in current tab instead of tab from request ([96a7f6a](https://github.com/yureitzk/human-first-search/commit/96a7f6af4452751c59bfcafd3a0ba52e09627abb))
+* redirect to noai when no redirect hostname ([e1b6a55](https://github.com/yureitzk/human-first-search/commit/e1b6a55a1a71571118ebd22f34be524ee1a43d99))
+
 ## [1.5.0](https://github.com/yureitzk/human-first-search/compare/v1.4.0...v1.5.0) (2025-12-27)
 
 
